@@ -17,7 +17,8 @@ func main() {
 
 	stopChan := make(chan bool)
 
-	err = client.SubscribeToQueue("add", handleAddTask)
+	consumer := messaging.NewConsumer("add", client)
+	err = consumer.OnMsg(handleAddTask)
 	handleErr(err, "couldn't subscribe to the `add` queue")
 
 	<-stopChan
