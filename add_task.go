@@ -10,6 +10,7 @@ type AddTask struct {
 func (t AddTask) Run() int {
 	return t.Number1 + t.Number2
 }
+
 func (t AddTask) String() string {
 	return fmt.Sprintf("AddTask(%d, %d)", t.Number1, t.Number2)
 }
