@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"workqueue"
-	"workqueue/common/messaging"
+	"workqueue/messaging"
 )
 
 func main() {

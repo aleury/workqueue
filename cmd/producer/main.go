@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"workqueue"
-	"workqueue/common/messaging"
+	"workqueue/messaging"
 )
 
 func main() {
