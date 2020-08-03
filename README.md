@@ -2,6 +2,11 @@
 
 Task queue application for computing the sum of two integers.
 
+## Start RabbitMQ
+```bash
+$ rabbitmq-server
+```
+
 ## Start a consumer
 ```bash
 $ cd cmd/consumer
