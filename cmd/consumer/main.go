@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -15,27 +14,19 @@ func main() {
 	wait := make(chan os.Signal, 1)
 	signal.Notify(wait, os.Interrupt)
 
-	if err := run(); err != nil {
-		log.Fatalf("Failed to start consumer: %s", err)
-	}
-
-	<-wait
-}
-
-func run() error {
 	client, err := messaging.NewRabbitMQClient(workqueue.Config.AMQPConnectionURL)
 	if err != nil {
-		return fmt.Errorf("couldn't establish connection to RabbitMQ: %s", err)
+		log.Fatalf("couldn't establish connection to RabbitMQ: %s", err)
 	}
 	defer client.Close()
 
 	consumer := messaging.NewConsumer("add", client)
 	err = consumer.OnMsg(handleAddTask)
 	if err != nil {
-		return fmt.Errorf("couldn't subscribe to the `add` queue: %s", err)
+		log.Fatalf("couldn't subscribe to the `add` queue: %s", err)
 	}
 
-	return nil
+	<-wait
 }
 
 func handleAddTask(msg []byte) error {
