@@ -2,24 +2,40 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
 
 	"workqueue"
 	"workqueue/messaging"
 )
 
 func main() {
-	client, err := messaging.NewRabbitMQClient(workqueue.Config.AMQPConnectionURL)
-	handleErr(err, "couldn't establish connection to RabbitMQ")
-	defer client.Close()
+	wait := make(chan os.Signal, 1)
+	signal.Notify(wait, os.Interrupt)
 
-	stopChan := make(chan bool)
+	if err := run(); err != nil {
+		log.Fatalf("Failed to start consumer: %s", err)
+	}
+
+	<-wait
+}
+
+func run() error {
+	client, err := messaging.NewRabbitMQClient(workqueue.Config.AMQPConnectionURL)
+	if err != nil {
+		return fmt.Errorf("couldn't establish connection to RabbitMQ: %s", err)
+	}
+	defer client.Close()
 
 	consumer := messaging.NewConsumer("add", client)
 	err = consumer.OnMsg(handleAddTask)
-	handleErr(err, "couldn't subscribe to the `add` queue")
+	if err != nil {
+		return fmt.Errorf("couldn't subscribe to the `add` queue: %s", err)
+	}
 
-	<-stopChan
+	return nil
 }
 
 func handleAddTask(msg []byte) error {
@@ -34,10 +50,4 @@ func handleAddTask(msg []byte) error {
 
 	log.Printf("Result %s: %d\n", addTask, addTask.Run())
 	return nil
-}
-
-func handleErr(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
-	}
 }
