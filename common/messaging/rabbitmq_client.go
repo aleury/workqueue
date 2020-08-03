@@ -111,7 +111,7 @@ func consumeLoop(deliveries <-chan amqp.Delivery, handlerFunc HandlerFunc) {
 			log.Printf("Error handling message: %s\n", err)
 			err = d.Nack(false, true)
 			if err != nil {
-				log.Printf("Error nacking message: %s", err)
+				log.Printf("Error nacking message: %s\n", err)
 			}
 			continue
 		}
