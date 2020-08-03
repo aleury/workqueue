@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/streadway/amqp"
-
 	"workqueue"
 	"workqueue/common/messaging"
 )
@@ -24,22 +22,18 @@ func main() {
 	<-stopChan
 }
 
-func handleAddTask(msg amqp.Delivery) {
-	log.Printf("Received a message: %s\n", msg.Body)
+func handleAddTask(msg []byte) error {
+	log.Printf("Received a message: %s\n", msg)
 
 	addTask := workqueue.AddTask{}
-	err := json.Unmarshal(msg.Body, &addTask)
+	err := json.Unmarshal(msg, &addTask)
 	if err != nil {
 		log.Printf("Error decoding message json: %s\n", err)
-	} else {
-		log.Printf("Result %s: %d\n", addTask, addTask.Run())
+		return err
 	}
 
-	if err := msg.Ack(false); err != nil {
-		log.Printf("Error acknowledging message: %s\n", err)
-	} else {
-		log.Println("Acknowledged message.")
-	}
+	log.Printf("Result %s: %d\n", addTask, addTask.Run())
+	return nil
 }
 
 func handleErr(err error, msg string) {

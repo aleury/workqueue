@@ -1,8 +1,6 @@
 package messaging
 
-import "github.com/streadway/amqp"
-
-type HandlerFunc func(delivery amqp.Delivery)
+type HandlerFunc func(msg []byte) error
 
 type Client interface {
 	PublishOnQueue(msg []byte, queueName string) error

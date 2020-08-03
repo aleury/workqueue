@@ -106,7 +106,21 @@ func (c *RabbitMQClient) Close() {
 
 func consumeLoop(deliveries <-chan amqp.Delivery, handlerFunc HandlerFunc) {
 	for d := range deliveries {
-		handlerFunc(d)
+		err := handlerFunc(d.Body)
+		if err != nil {
+			log.Printf("Error handling message: %s\n", err)
+			err = d.Nack(false, true)
+			if err != nil {
+				log.Printf("Error nacking message: %s", err)
+			}
+			continue
+		}
+
+		if err := d.Ack(false); err != nil {
+			log.Printf("Error acknowledging message: %s\n", err)
+		} else {
+			log.Println("Acknowledged message.")
+		}
 	}
 }
 
